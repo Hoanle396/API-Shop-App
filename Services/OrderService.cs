@@ -137,11 +137,7 @@ public class OrderService : IOrderService
   {
     try
     {
-      return await ctx.orders
-          .Where(s =>
-      EF.Functions.Like(s.Code!, $"%{model.keyword}%") ||
-      EF.Functions.Like(s.Status, $"%{model.keyword}%"))
-          .Select(order => new Order
+      return await ctx.orders.Select(order => new Order
           {
             Id = order.Id,
             Amount = order.Amount,

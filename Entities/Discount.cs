@@ -20,6 +20,6 @@ public class Discount : BaseEntity
   [Required, StringLength(1000), Column("description")]
   public string? Description { get; set; }
 
-  [Required, DatabaseGenerated(DatabaseGeneratedOption.Computed), Column("endDate")]
+  [Required, Column("endDate")]
   public DateTime EndDate { get; set; }
 }
