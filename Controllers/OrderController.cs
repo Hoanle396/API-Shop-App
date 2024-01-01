@@ -53,7 +53,7 @@ public class OrderController : ControllerBase
       return BadRequest(new { message = ex.Message });
     }
   }
-  [HttpGet("{id}")]
+  [HttpGet("{id}"),Authorize]
   public async Task<IActionResult> FindById(int id)
   {
     try

@@ -20,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IProductService, ProductService>();
     services.AddScoped<IDiscountService, DiscountService>();
     services.AddScoped<IOrderService, OrderService>();
+    services.AddScoped<IDashboardService, DashboardService>();
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen(option => {
         option.SwaggerDoc("v1", new OpenApiInfo { Title = "C# API", Version = "v1" });

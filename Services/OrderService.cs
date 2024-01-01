@@ -138,18 +138,19 @@ public class OrderService : IOrderService
     try
     {
       return await ctx.orders.Select(order => new Order
-          {
-            Id = order.Id,
-            Amount = order.Amount,
-            Code = order.Code,
-            Status = order.Status,
-            CreatedAt = order.CreatedAt,
-            UpdatedAt = order.UpdatedAt,
-            user = order.user
+      {
+        Id = order.Id,
+        Amount = order.Amount,
+        Code = order.Code,
+        Status = order.Status,
+        CreatedAt = order.CreatedAt,
+        UpdatedAt = order.UpdatedAt,
+        user = order.user
 
-          })
+      })
           .Skip(((model.page ?? 1) - 1) * (model.limit ?? 10))
           .Take(model.limit ?? 10)
+          .OrderByDescending(s => s.CreatedAt)
           .ToListAsync();
     }
     catch
