@@ -8,6 +8,7 @@ public interface IDashboardService
 {
   Task<dynamic?> Statistical();
 
+  Task<dynamic?> WeeklyReport();
 }
 
 public class DashboardService : IDashboardService
@@ -50,4 +51,31 @@ public class DashboardService : IDashboardService
       throw;
     }
   }
+  public async Task<dynamic?> WeeklyReport()
+  {
+    try
+    {
+      return new
+      {
+        orders = ctx.orders.GroupBy(s => s.CreatedAt.Date)
+        .Select(g => new
+        {
+          date = g.Key,
+          value = g.Count()
+        }).OrderByDescending(s => s.date).Take(7).Reverse(),
+
+        sales = ctx.orders.GroupBy(s => s.CreatedAt.Date)
+        .Select(g => new
+        {
+          date = g.Key,
+          value = g.Sum(s => s.Amount)
+        }).OrderByDescending(s => s.date).Take(7).Reverse()
+      };
+    }
+    catch
+    {
+      throw;
+    }
+  }
+
 }

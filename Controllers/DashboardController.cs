@@ -18,12 +18,17 @@ public class DashBoardController : ControllerBase
     _dashboardService = dashboardService;
   }
 
-  [HttpPost("statistical")]
+  [HttpGet("statistical")]
   public async Task<IActionResult> Statistical()
   {
     var response = await _dashboardService.Statistical();
+    return Ok(response);
+  }
 
-
+  [HttpGet("weekly-report")]
+  public async Task<IActionResult> WeeklyReport()
+  {
+    var response = await _dashboardService.WeeklyReport();
     return Ok(response);
   }
 }
