@@ -18,14 +18,14 @@ public class DashBoardController : ControllerBase
     _dashboardService = dashboardService;
   }
 
-  [HttpGet("statistical")]
+  [HttpGet("statistical"), Authorize(Enum.Roles.ADMIN)]
   public async Task<IActionResult> Statistical()
   {
     var response = await _dashboardService.Statistical();
     return Ok(response);
   }
 
-  [HttpGet("weekly-report")]
+  [HttpGet("weekly-report"), Authorize(Enum.Roles.ADMIN)]
   public async Task<IActionResult> WeeklyReport()
   {
     var response = await _dashboardService.WeeklyReport();

@@ -21,4 +21,6 @@ public class Shipping : BaseEntity
   [Required, StringLength(255), Column("email")]
   public string? Email { get; set; }
 
+  [Required, StringLength(255), Column("phone")]
+  public string? Phone { get; set; }
 }

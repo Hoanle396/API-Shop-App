@@ -11,7 +11,7 @@ using WebAPI.Helpers;
 public interface IOrderService
 {
   Task<dynamic?> Create(CreateOrderRequest model, User user);
-  Task<IEnumerable<Order?>> Find(FindRequest model);
+  Task<IEnumerable<Order?>> Find(FindRequest model, User user);
   Task<dynamic?> GetById(int id);
   Task<bool?> Update(int id, UpdateOrderStatus model);
 }
@@ -99,6 +99,7 @@ public class OrderService : IOrderService
           PaymentStatus = PaymentStatus.PENDING,
           orderId = order.Id,
           Email = model.email,
+          Phone = model.phone
         };
         await ctx.shipping.AddAsync(shipping);
         await ctx.SaveChangesAsync();
@@ -133,11 +134,13 @@ public class OrderService : IOrderService
     }
   }
 
-  public async Task<IEnumerable<Order?>> Find(FindRequest model)
+  public async Task<IEnumerable<Order?>> Find(FindRequest model, User user)
   {
     try
     {
-      return await ctx.orders.Select(order => new Order
+      return await ctx.orders
+      .Where(s => user.Role != Roles.ADMIN ? s.userId == user.Id : 1 == 1)
+      .Select(order => new Order
       {
         Id = order.Id,
         Amount = order.Amount,
@@ -169,6 +172,7 @@ public class OrderService : IOrderService
         code = order.Code,
         amount = order.Amount,
         status = order.Status,
+        user = order.user,
         updatedAt = order.UpdatedAt,
         createdAt = order.CreatedAt,
         detail = ctx.orderDetails.Where(s => s.orderId == order.Id).Select(d => new

@@ -39,12 +39,12 @@ public class OrderController : ControllerBase
     }
   }
 
-  [HttpGet(""), Authorize(Roles.ADMIN)]
+  [HttpGet(""), Authorize]
   public async Task<IActionResult> Find([FromQuery] FindRequest model)
   {
     try
     {
-      var response = await _orderService.Find(model);
+      var response = await _orderService.Find(model, HttpContext.Items["User"] as User);
       return Ok(response);
     }
     catch (Exception ex)
@@ -53,7 +53,7 @@ public class OrderController : ControllerBase
       return BadRequest(new { message = ex.Message });
     }
   }
-  [HttpGet("{id}"),Authorize]
+  [HttpGet("{id}"), Authorize]
   public async Task<IActionResult> FindById(int id)
   {
     try
