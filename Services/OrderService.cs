@@ -28,7 +28,8 @@ public class OrderService : IOrderService
     {
       try
       {
-        float price = 0;
+        float price = 0, finalPrice = 0, discountPrice = 0;
+
         foreach (var productId in model.products)
         {
           var product = await ctx.products.Where(s => s.Id == productId.product).FirstOrDefaultAsync();
@@ -45,6 +46,7 @@ public class OrderService : IOrderService
           }
           price += product.Price * productId.quantity;
         }
+        finalPrice = price;
         if (model.discount != null)
         {
           try
@@ -52,11 +54,13 @@ public class OrderService : IOrderService
             var discount = await discountService.Check(model.discount);
             if (discount.Type == Enum.Discount.VALUE)
             {
-              price -= discount.Value;
+              discountPrice = discount.Value;
+              finalPrice = price - discountPrice;
             }
             else if (discount.Type == Enum.Discount.PERCENT)
             {
-              price -= price * discount.Value / 100;
+              discountPrice = price * discount.Value / 100;
+              finalPrice = price - discountPrice;
             }
           }
           catch
@@ -66,7 +70,7 @@ public class OrderService : IOrderService
         }
         var order = new Order
         {
-          Amount = price,
+          Amount = finalPrice,
           Status = OrderStatus.PENDING,
           userId = user.Id,
           Code = Utils.RandomCode()
@@ -74,11 +78,12 @@ public class OrderService : IOrderService
         await ctx.orders.AddAsync(order);
         await ctx.SaveChangesAsync();
 
+        List<ProductDetail> detail = new List<ProductDetail>();
         foreach (var productId in model.products)
         {
           var product = await ctx.products.Where(s => s.Id == productId.product).FirstOrDefaultAsync();
           var size = product!.Sizes?.Where(s => s.SizeName == productId.size).FirstOrDefault();
-          price += product!.Price * productId.quantity;
+          var productPrice = product!.Price * productId.quantity;
           size!.Quantity = size.Quantity - productId.quantity;
           await ctx.SaveChangesAsync();
           var orderDetail = new OrderDetail
@@ -91,6 +96,14 @@ public class OrderService : IOrderService
           };
           await ctx.orderDetails.AddAsync(orderDetail);
           await ctx.SaveChangesAsync();
+
+          detail.Add(new ProductDetail
+          {
+            Name = product.Name,
+            Price = product.Price,
+            Quantity = productId.quantity,
+            totalPrice = productPrice
+          });
         }
 
         var shipping = new Shipping
@@ -104,6 +117,21 @@ public class OrderService : IOrderService
         await ctx.shipping.AddAsync(shipping);
         await ctx.SaveChangesAsync();
 
+        await MailUtils.SendMailGoogleSmtp(
+          AppSettings.Email,
+           model.email,
+           "Order confirm",
+            new OrderProduct
+            {
+              discount = discountPrice.ToString(),
+              finalPrice = finalPrice.ToString(),
+              order = order,
+              product = detail,
+              shipping = shipping,
+              total = finalPrice.ToString()
+            });
+
+      
         dbcxtransaction.Commit();
         return order;
       }
