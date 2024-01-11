@@ -37,10 +37,9 @@ public class OrderService : IOrderService
           {
             throw new Exception("Product does not exist.");
           }
-          System.Console.WriteLine($"product: {product}");
-          var size = await ctx.sizes.Where(s => s.SizeName == productId.size && s.productId == product.Id).FirstOrDefaultAsync();
-          System.Console.WriteLine($"size: {size}");
-          if (size == null || (size?.Quantity ?? 0 - productId.quantity) < 0)
+          var size = await ctx.sizes.Where(s => s.SizeName == productId.size && s.productId == product.Id && s.Quantity > productId.quantity).FirstOrDefaultAsync();
+  
+          if (size == null)
           {
             throw new Exception("Product does allow this quantity");
           }
